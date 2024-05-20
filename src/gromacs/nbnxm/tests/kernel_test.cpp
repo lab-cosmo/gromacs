@@ -511,7 +511,8 @@ TEST_P(NbnxmKernelTest, WorksWith)
         // TODO rename this in a follow-up change to conform to style
         TestSystem system_(parameters_.vdwKernelType == vdwktLJCUT_COMBGEOM
                                    ? LJCombinationRule::Geometric
-                                   : LJCombinationRule::LorentzBerthelot);
+                                   : LJCombinationRule::LorentzBerthelot,
+                           true);
 
         const interaction_const_t ic = setupInteractionConst(options_);
 

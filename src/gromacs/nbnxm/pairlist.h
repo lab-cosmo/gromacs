@@ -208,6 +208,14 @@ static constexpr int c_nbnxnGpuClusterpairSplit = 2;
 static constexpr int c_nbnxnGpuExclSize =
         c_nbnxnGpuClusterSize * c_nbnxnGpuClusterSize / c_nbnxnGpuClusterpairSplit;
 
+//! Returns the index of atom with index \p atomIndex within a split (or whole when not split) cluster-pair
+static inline int atomIndexInClusterpairSplit(const int atomIndex)
+{
+    constexpr int c_nbnxmClusterpairSplitSize = c_nbnxnGpuClusterSize / c_nbnxnGpuClusterpairSplit;
+
+    return atomIndex & (c_nbnxmClusterpairSplitSize - 1);
+}
+
 //! Whether we want to use GPU for neighbour list sorting
 constexpr bool nbnxmSortListsOnGpu()
 {

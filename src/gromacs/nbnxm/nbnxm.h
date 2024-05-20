@@ -261,6 +261,22 @@ enum
     enbvClearFYes
 };
 
+/*! \brief A plain pairlist that can contain both normal and excluded pairs
+ *
+ * The first element of each entry is the atom pair, the second is the shift vector index.
+ * The distance vector is then given by: x[first.first] - x[first.second] + shiftVector[second]
+ */
+struct PlainPairlist
+{
+    using ParticlePair  = std::pair<int, int>;
+    using PairlistEntry = std::pair<ParticlePair, int>;
+
+    //! List of normal pairs
+    std::vector<PairlistEntry> pairs;
+    //! List of excluded atom pairs
+    std::vector<PairlistEntry> excludedPairs;
+};
+
 /*! \libinternal
  *  \brief Top-level non-bonded data structure for the Verlet-type cut-off scheme. */
 struct nonbonded_verlet_t
@@ -489,6 +505,13 @@ public:
 
     //! Returns a pointer to the NbnxmGpu object, can return nullptr
     NbnxmGpu* gpuNbv() { return gpuNbv_; }
+
+    /*! \brief Returns a plain pairlist
+     *
+     * When running with domain decomposition, the union of the pairlist returned
+     * on the domains contains all pairs in the system
+     */
+    const PlainPairlist& getPlainPairlist();
 
 private:
     //! All data related to the pair lists

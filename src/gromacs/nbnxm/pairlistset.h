@@ -60,6 +60,7 @@
 struct nbnxn_atomdata_t;
 struct PairlistParams;
 struct PairsearchWork;
+struct PlainPairlist;
 struct SearchCycleCounting;
 struct t_nrnb;
 
@@ -119,6 +120,12 @@ public:
 
     //! Returns the number of perturbed excluded pairs that are within distance rlist
     int numPerturbedExclusionsWithinRlist() const { return numPerturbedExclusionsWithinRlist_; }
+
+    /*! \brief Appends the contents of our pairlists, except for exclusions, to \p plainPairlist
+     *
+     * The atom indices in the plain list are normal, not NBNxM order, atom indices.
+     */
+    void appendPlainPairlist(PlainPairlist* plainPairlist, gmx::ArrayRef<const int> atomIndices);
 
 private:
     //! List of pairlists in CPU layout

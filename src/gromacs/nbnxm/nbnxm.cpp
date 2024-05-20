@@ -256,4 +256,9 @@ bool buildSupportsNonbondedOnGpu(std::string* error)
     return errorReasons.isEmpty();
 }
 
+const PlainPairlist& nonbonded_verlet_t::getPlainPairlist()
+{
+    return pairlistSets_->getPlainPairlist(pairSearch_->gridSet().atomIndices());
+}
+
 /*! \endcond */

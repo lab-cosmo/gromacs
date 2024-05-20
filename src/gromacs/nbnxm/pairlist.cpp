@@ -1461,12 +1461,6 @@ static inline int cj_to_cjPacked(int cj)
     return cj / c_nbnxnGpuJgroupSize;
 }
 
-/* Return the index of an j-atom within a warp */
-static inline int a_mod_wj(int a)
-{
-    return a & (c_nbnxnGpuClusterSize / c_nbnxnGpuClusterpairSplit - 1);
-}
-
 /* As make_fep_list above, but for super/sub lists. */
 static void make_fep_list(gmx::ArrayRef<const int> atomIndices,
                           const nbnxn_atomdata_t*  nbat,
@@ -1572,7 +1566,7 @@ static void make_fep_list(gmx::ArrayRef<const int> atomIndices,
                                             j / (c_nbnxnGpuClusterSize / c_nbnxnGpuClusterpairSplit);
                                     nbnxn_excl_t& excl = get_exclusion_mask(nbl, cjPacked_ind, jHalf);
 
-                                    int          excl_pair = a_mod_wj(j) * nbl->na_ci + i;
+                                    int excl_pair = atomIndexInClusterpairSplit(j) * nbl->na_ci + i;
                                     unsigned int excl_bit = (1U << (gcj * c_gpuNumClusterPerCell + c));
 
                                     real dx = nbat->x()[ind_j * nbat->xstride + XX] - xi;
@@ -1731,7 +1725,8 @@ static void setExclusionsForIEntry(const Nbnxm::GridSet&   gridSet,
                             nbnxn_excl_t& interactionMask =
                                     get_exclusion_mask(nbl, cj_to_cjPacked(index), jHalf);
 
-                            interactionMask.pair[a_mod_wj(innerJ) * c_clusterSize + innerI] &= ~pairMask;
+                            interactionMask.pair[atomIndexInClusterpairSplit(innerJ) * c_clusterSize + innerI] &=
+                                    ~pairMask;
                         }
                     }
                 }
@@ -4041,7 +4036,8 @@ void nonbonded_verlet_t::constructPairlist(const InteractionLocality iLocality,
 {
     pairlistSets_->construct(iLocality, pairSearch_.get(), nbat_.get(), exclusions, step, nrnb);
 
-    if (useGpu())
+    // For tests it is convenient to allow gpuNbv_==nullptr and skip GPU calls
+    if (useGpu() && gpuNbv_ != nullptr)
     {
         /* Launch the transfer of the pairlist to the GPU.
          *
