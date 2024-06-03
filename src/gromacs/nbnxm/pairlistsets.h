@@ -79,6 +79,7 @@ public:
                    PairSearch*                  pairSearch,
                    nbnxn_atomdata_t*            nbat,
                    const gmx::ListOfLists<int>& exclusions,
+                   bool                         includeAllPairs,
                    int64_t                      step,
                    t_nrnb*                      nrnb);
 
@@ -159,8 +160,10 @@ private:
     std::unique_ptr<PairlistSet> localSet_;
     //! Non-local pairlist set
     std::unique_ptr<PairlistSet> nonlocalSet_;
+    //! Whether also non-interacting pairs are included in the list
+    bool includesAllPairs_ = false;
     //! MD step at with the outer lists in pairlistSets_ were created
-    int64_t outerListCreationStep_;
+    int64_t outerListCreationStep_ = -1;
 
     //! Storage for returning a plain pairlist
     PlainPairlist plainPairlist_;

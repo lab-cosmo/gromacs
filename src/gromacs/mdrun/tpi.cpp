@@ -660,7 +660,7 @@ void LegacySimulator::do_tpi()
                 /* TODO: Avoid updating all atoms at every bNS step */
                 fr_->nbv->setAtomProperties(mdatoms->typeA, mdatoms->chargeA, fr_->atomInfo);
 
-                fr_->nbv->constructPairlist(InteractionLocality::Local, top_->excls, step, nrnb_);
+                fr_->nbv->constructPairlist(InteractionLocality::Local, top_->excls, false, step, nrnb_);
 
                 bNS = FALSE;
             }

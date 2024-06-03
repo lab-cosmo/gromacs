@@ -382,13 +382,19 @@ public:
      * of atoms when not using DD, or the total number of atoms in the i-zones
      * when using DD.
      *
-     * \param[in] iLocality   The interaction locality: local or non-local
-     * \param[in] exclusions  Lists of exclusions for every atom.
-     * \param[in] step        Used to set the list creation step
-     * \param[in,out] nrnb    Flop accounting struct, can be nullptr
+     * For normal MD simulations, pairs involving atoms with zero LJ parameters
+     * and charge do not need to be included. When a complete pairlist is required,
+     * the \p includeAllPairs argument should be set to \p true.
+     *
+     * \param[in] iLocality        The interaction locality: local or non-local
+     * \param[in] exclusions       Lists of exclusions for every atom.
+     * \param[in] includeAllPairs  Whether also non-interacting pairs should be part of the list
+     * \param[in] step             Used to set the list creation step
+     * \param[in,out] nrnb         Flop accounting struct, can be nullptr
      */
     void constructPairlist(gmx::InteractionLocality     iLocality,
                            const gmx::ListOfLists<int>& exclusions,
+                           bool                         includeAllPairs,
                            int64_t                      step,
                            t_nrnb*                      nrnb) const;
 

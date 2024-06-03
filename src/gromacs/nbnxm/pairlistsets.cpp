@@ -44,10 +44,15 @@
 
 #include "pairlistsets.h"
 
+#include "gromacs/utility/gmxassert.h"
+
 #include "pairlistset.h"
 
 const PlainPairlist& PairlistSets::getPlainPairlist(gmx::ArrayRef<const int> atomIndices)
 {
+    GMX_RELEASE_ASSERT(includesAllPairs_ == true,
+                       "We should have all pairs when getting a plain pairlist");
+
     plainPairlist_.pairs.clear();
     plainPairlist_.excludedPairs.clear();
 

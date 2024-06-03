@@ -157,7 +157,7 @@ std::unique_ptr<nonbonded_verlet_t> setupNbnxmForBenchInstance(const KernelOptio
                         0,
                         nullptr);
 
-    nbv->constructPairlist(gmx::InteractionLocality::Local, system.excls, 0, nullptr);
+    nbv->constructPairlist(gmx::InteractionLocality::Local, system.excls, true, 0, nullptr);
 
     nbv->setAtomProperties(system.atomTypes, system.charges, system.atomInfo);
 
@@ -216,12 +216,12 @@ TEST_P(PlainPairlistTest, ContainsAllPairs)
     }
 
     // TODO rename this in a follow-up change to conform to style
-    TestSystem system_(LJCombinationRule::Geometric, false);
+    TestSystem system_(LJCombinationRule::Geometric, true);
 
     // Finish setting up data structures
     std::unique_ptr<nonbonded_verlet_t> nbv = setupNbnxmForBenchInstance(options, system_);
 
-    nbv->constructPairlist(InteractionLocality::Local, system_.excls, 0, nullptr);
+    nbv->constructPairlist(InteractionLocality::Local, system_.excls, true, 0, nullptr);
 
     std::vector<RVec> shiftVecs(c_numShiftVectors);
     calc_shifts(system_.box, shiftVecs);

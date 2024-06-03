@@ -92,6 +92,7 @@ public:
                             gmx::ArrayRef<PairsearchWork> searchWork,
                             nbnxn_atomdata_t*             nbat,
                             const gmx::ListOfLists<int>&  exclusions,
+                            bool                          includeAllPairs,
                             int                           minimumIlistCountForGpuBalancing,
                             t_nrnb*                       nrnb,
                             SearchCycleCounting*          searchCycleCounting);

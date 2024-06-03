@@ -2813,6 +2813,7 @@ static void nbnxn_make_pairlist_part(const Nbnxm::GridSet&   gridSet,
                                      PairsearchWork*         work,
                                      const nbnxn_atomdata_t* nbat,
                                      const ListOfLists<int>& exclusions,
+                                     const bool              includeAllPairs,
                                      real                    rlist,
                                      const PairlistType      pairlistType,
                                      int                     ci_block,
@@ -2968,8 +2969,9 @@ static void nbnxn_make_pairlist_part(const Nbnxm::GridSet&   gridSet,
     int ci_y = 0;
     while (next_ci(iGrid, nth, ci_block, &ci_x, &ci_y, &ci_b, &ci))
     {
-        if (c_listIsSimple && flags_i[ci] == 0)
+        if (c_listIsSimple && !includeAllPairs && flags_i[ci] == 0)
         {
+            // This i-cluster has no non-bonded interactions
             continue;
         }
         const int ncj_old_i = getNumSimpleJClustersInList(*nbl);
@@ -3663,6 +3665,7 @@ void PairlistSet::constructPairlists(gmx::InteractionLocality      locality,
                                      gmx::ArrayRef<PairsearchWork> searchWork,
                                      nbnxn_atomdata_t*             nbat,
                                      const ListOfLists<int>&       exclusions,
+                                     const bool                    includeAllPairs,
                                      const int                     minimumIlistCountForGpuBalancing,
                                      t_nrnb*                       nrnb,
                                      SearchCycleCounting*          searchCycleCounting)
@@ -3777,6 +3780,7 @@ void PairlistSet::constructPairlists(gmx::InteractionLocality      locality,
                                                  &work,
                                                  nbat,
                                                  exclusions,
+                                                 includeAllPairs,
                                                  rlist,
                                                  params_.pairlistType,
                                                  ci_block,
@@ -3797,6 +3801,7 @@ void PairlistSet::constructPairlists(gmx::InteractionLocality      locality,
                                                  &work,
                                                  nbat,
                                                  exclusions,
+                                                 includeAllPairs,
                                                  rlist,
                                                  params_.pairlistType,
                                                  ci_block,
@@ -3983,9 +3988,12 @@ void PairlistSets::construct(const InteractionLocality iLocality,
                              PairSearch*               pairSearch,
                              nbnxn_atomdata_t*         nbat,
                              const ListOfLists<int>&   exclusions,
+                             const bool                includeAllPairs,
                              const int64_t             step,
                              t_nrnb*                   nrnb)
 {
+    includesAllPairs_ = includeAllPairs;
+
     const auto& gridSet = pairSearch->gridSet();
     const auto* ddZones = gridSet.domainSetup().zones;
 
@@ -4003,6 +4011,7 @@ void PairlistSets::construct(const InteractionLocality iLocality,
                                               pairSearch->work(),
                                               nbat,
                                               exclusions,
+                                              includeAllPairs,
                                               minimumIlistCountForGpuBalancing_,
                                               nrnb,
                                               &pairSearch->cycleCounting_);
@@ -4031,10 +4040,12 @@ void PairlistSets::construct(const InteractionLocality iLocality,
 
 void nonbonded_verlet_t::constructPairlist(const InteractionLocality iLocality,
                                            const ListOfLists<int>&   exclusions,
+                                           const bool                includeAllPairs,
                                            int64_t                   step,
                                            t_nrnb*                   nrnb) const
 {
-    pairlistSets_->construct(iLocality, pairSearch_.get(), nbat_.get(), exclusions, step, nrnb);
+    pairlistSets_->construct(
+            iLocality, pairSearch_.get(), nbat_.get(), exclusions, includeAllPairs, step, nrnb);
 
     // For tests it is convenient to allow gpuNbv_==nullptr and skip GPU calls
     if (useGpu() && gpuNbv_ != nullptr)
