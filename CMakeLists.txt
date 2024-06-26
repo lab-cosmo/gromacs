@@ -218,6 +218,8 @@ option(GMX_MIMIC "Enable MiMiC QM/MM interface (CPMD is required)" OFF)
 
 option(GMX_CP2K "Enable CP2K QM/MM interface (CP2K 8.1 or later is required)" OFF)
 
+option(GMX_TORCH "Enable Libtorch interface" OFF)
+
 # We need to enable Fortran, because CP2K will be linked
 if(GMX_CP2K)
     enable_language(Fortran)
@@ -569,6 +571,11 @@ include(gmxManageMimic)
 include(gmxManageCP2K)
 
 ########################################################################
+#Process LibTorch settings
+########################################################################
+include(gmxManageTorch)
+
+########################################################################
 #Process shared/static library settings
 ########################################################################
 include(gmxManageSharedLibraries)
@@ -610,7 +617,7 @@ if (GMX_HWLOC)
     if (HWLOC_FIND_QUIETLY_AFTER_FIRST_RUN)
         set(HWLOC_FIND_QUIETLY TRUE)
     endif()
-    find_package(HWLOC 1.5) 
+    find_package(HWLOC 1.5)
 
     if (HWLOC_FOUND)
         if (HWLOC_LIBRARIES MATCHES ".a$")
@@ -710,7 +717,7 @@ if(GMX_GPU)
     elseif(${_gmx_gpu_uppercase} STREQUAL "HIP")
         include(gmxManageHip)
     elseif(${_gmx_gpu_uppercase} STREQUAL "OPENCL")
-        message(STATUS "GPU support with OpenCL is deprecated. It is still fully supported (and " 
+        message(STATUS "GPU support with OpenCL is deprecated. It is still fully supported (and "
             "recommended for Apple GPUs). Please use CUDA for running on NVIDIA GPUs and "
             "SYCL for running on Intel and AMD GPUs.")
         include(gmxManageOpenCL)
