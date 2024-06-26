@@ -1,7 +1,7 @@
 #
 # This file is part of the GROMACS molecular simulation package.
 #
-# Copyright 2015- The GROMACS Authors
+# Copyright 2024- The GROMACS Authors
 # and the project initiators Erik Lindahl, Berk Hess and David van der Spoel.
 # Consult the AUTHORS/COPYING files and https://www.gromacs.org for details.
 #
@@ -31,45 +31,32 @@
 # To help us fund GROMACS development, we humbly ask that you cite
 # the research papers on the package. Check out https://www.gromacs.org.
 
-# Set up the module library
-add_library(applied_forces INTERFACE)
+if (GMX_METATENSOR)
+    include(FetchContent)
 
-# Source files have the following private module dependencies.
-target_link_libraries(applied_forces PRIVATE
-                      #                      gmxlib
-                      #                      math
-                      #                      mdtypes
-                      #                      tng_io
-                      )
+    set(URL_BASE "https://github.com/lab-cosmo/metatensor/releases/download")
 
-# Public interface for modules, including dependencies and interfaces
-#target_include_directories(applied_forces PUBLIC
-target_include_directories(applied_forces INTERFACE
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-#target_link_libraries(applied_forces PUBLIC
-target_link_libraries(applied_forces INTERFACE
-                      legacy_api
-                      )
-
-# TODO: when fileio is an OBJECT target
-#target_link_libraries(applied_forces PUBLIC legacy_api)
-#target_link_libraries(applied_forces PRIVATE common)
-
-# Source files have the following private module dependencies.
-#target_link_libraries(applied_forces PRIVATE tng_io)
-# TODO: Explicitly link specific modules.
-#target_link_libraries(applied_forces PRIVATE legacy_modules)
-
-gmx_add_libgromacs_sources(
-    electricfield.cpp
+    # TODO: switch this up to allow using pre-built versions of the shared
+    # libraries
+    set(METATENSOR_CORE_VERSION "0.1.8")
+    FetchContent_Declare(metatensor
+        URL ${URL_BASE}/metatensor-core-v${METATENSOR_CORE_VERSION}/metatensor-core-cxx-${METATENSOR_CORE_VERSION}.tar.gz
+        URL_HASH SHA1=3ed389770e5ec6dbb8cbc9ed88f84d6809b552ef
     )
 
-add_subdirectory(awh)
-add_subdirectory(densityfitting)
-add_subdirectory(qmmm)
-add_subdirectory(colvars)
-add_subdirectory(metatensor)
+    message(STATUS "Fetching metatensor v${METATENSOR_CORE_VERSION} from github")
+    FetchContent_MakeAvailable(metatensor)
 
-if (BUILD_TESTING)
-    add_subdirectory(tests)
+
+    set(METATENSOR_TORCH_VERSION "0.5.1")
+    FetchContent_Declare(metatensor-torch
+        URL ${URL_BASE}/metatensor-torch-v${METATENSOR_TORCH_VERSION}/metatensor-torch-cxx-${METATENSOR_TORCH_VERSION}.tar.gz
+        URL_HASH SHA1=a95535876b27c998924ef438ca65c8533df7db50
+    )
+
+    message(STATUS "Fetching metatensor-torch v${METATENSOR_TORCH_VERSION} from github")
+    FetchContent_MakeAvailable(metatensor-torch)
+
+
+    list(APPEND GMX_COMMON_LIBRARIES metatensor_torch)
 endif()

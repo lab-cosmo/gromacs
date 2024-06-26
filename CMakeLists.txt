@@ -220,9 +220,15 @@ option(GMX_CP2K "Enable CP2K QM/MM interface (CP2K 8.1 or later is required)" OF
 
 option(GMX_TORCH "Enable Libtorch interface" OFF)
 
+option(GMX_METATENSOR "Enable metatensor interface" OFF)
+
 # We need to enable Fortran, because CP2K will be linked
 if(GMX_CP2K)
     enable_language(Fortran)
+endif()
+
+if (GMX_METATENSOR)
+    set(GMX_TORCH ON CACHE BOOL "Enable Libtorch interface" FORCE)
 endif()
 
 option(GMX_FAHCORE "Build a library with mdrun functionality" OFF)
@@ -574,6 +580,11 @@ include(gmxManageCP2K)
 #Process LibTorch settings
 ########################################################################
 include(gmxManageTorch)
+
+########################################################################
+#Process metatensor settings *after* torch settings
+########################################################################
+include(gmxManageMetatensor)
 
 ########################################################################
 #Process shared/static library settings
